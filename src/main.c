@@ -22,11 +22,21 @@ int main(int argc, char** argv) {
   float sum_time = 0.0, dif_time = 0.0,
         mul_time = 0.0, div_time = 0.0;
 
+  #ifdef SERIAL
+  printf("Settings:\n\tARRAY_SIZE:\t%d\n\tCYCLES:\t%d\n\tElement size:\t%lu\n",
+         arr_size, cycles, sizeof(arr_t));
+  #endif
+
   #ifndef SERIAL
   MPI_Init(&argc, &argv);
   int32_t rank, size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+  if(rank == 0)
+    printf("Settings:\n\tARRAY_SIZE:\t%d\n\tCYCLES:\t%d\n\tElement size:\t%lu\n\tCORES_AMOUNT:\t%d\n",
+           arr_size, cycles, sizeof(arr_t), size);
+
   for(uint32_t i=0; i<cycles; ++i) {
     if(rank == 0)
       Randomize(arr1, arr_size, MIN_RAND, MAX_RAND);

@@ -16,8 +16,10 @@ all: $(TARGET)
 
 serial: CCFLAGS += -DSERIAL
 serial: $(TARGET)
+	mv $(TARGET) "$(TARGET)_serial"
 
 parallel: $(TARGET)
+	mv $(TARGET) "$(TARGET)_parallel"
 
 $(TARGET): $(OBJ)
 	$(CC) $(CCFLAGS) -o $@ $^

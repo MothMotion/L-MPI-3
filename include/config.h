@@ -11,5 +11,6 @@
 
 #define MIN_RAND 1
 #define MAX_RAND 255
+//#define SERIAL
 
 #endif // !CONFIG_H

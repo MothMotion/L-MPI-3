@@ -6,10 +6,53 @@
 #include <time.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-int main() {
-  arr_t *arr1 = malloc(ARRAY_SIZE * sizeof(arr_t)),
-        *arr2 = malloc(ARRAY_SIZE * sizeof(arr_t)),
-        *out  = malloc(ARRAY_SIZE * sizeof(arr_t));
+#include <mpi.h>
+
+int main(int argc, char** argv) {
+  srand(time(NULL));
+  const uint32_t arr_size = ARRAY_SIZE;
+  const uint32_t cycles   = CYCLES;
+
+  arr_t *arr1 = malloc(arr_size * sizeof(arr_t)),
+        *arr2 = malloc(arr_size * sizeof(arr_t)),
+        *out  = malloc(arr_size * sizeof(arr_t));
+
+  float sum_time = 0.0, dif_time = 0.0,
+        mul_time = 0.0, div_time = 0.0;
+
+  #ifndef SERIAL
+  MPI_Init(&argc, &argv);
+  int32_t rank, size;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  for(uint32_t i=0; i<cycles; ++i) {
+    if(rank == 0)
+      Randomize(arr1, arr_size, MIN_RAND, MAX_RAND);
+    if(size == 1 || size >= 2 && rank == 1)
+      Randomize(arr2, arr_size, MIN_RAND, MAX_RAND);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+
+  }
+  #endif
+
+  for(uint32_t i=0; i<cycles; ++i) {
+    Randomize(arr1, arr_size, MIN_RAND, MAX_RAND);
+    Randomize(arr2, arr_size, MIN_RAND, MAX_RAND);
+
+    ADDTIME_COR(Summ, sum_time, cycles, arr1, arr2, out, arr_size);
+    ADDTIME_COR(Diff, dif_time, cycles, arr1, arr2, out, arr_size);
+    ADDTIME_COR(Mult, mul_time, cycles, arr1, arr2, out, arr_size);
+    ADDTIME_COR(Div, div_time, cycles, arr1, arr2, out, arr_size);
+  }
+  printf("Serial ");
+
+  #endif
+
+  printf("execution:\n\tSum:\t%f\n\tDif:\t%f\n\tMul:\t%f\n\tDiv:\t%f\n",
+         sum_time, dif_time, mul_time, div_time);
+
   return 0;
 }

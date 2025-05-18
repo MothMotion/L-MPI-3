@@ -1,0 +1,16 @@
+#!/bin/bash
+
+mkdir -p logs err
+
+#BSUB -J lab2_t1
+#BSUB -P mothm_lab2_t1
+#BSUB -W 08:00
+#BSUB -n 1
+#BSUB -oo logs/pr4.log
+#BSUB -eo err/pr4.err
+
+export OMP_NUM_THREADS=4
+export ARRAY_SIZE=2000000
+export CYCLES=100
+#export OMP_NUM_THREADS=4
+mpiexec -n 2 ./program

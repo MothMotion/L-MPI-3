@@ -8,7 +8,7 @@
 void Summ(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #ifdef SERIAL
   for(uint32_t i=0; i<size; ++i)
-    arr_out[i] = arr1[i] + arr2[i]
+    arr_out[i] = arr1[i] + arr2[i];
 
   #else
   int32_t num_threads, cur_thread;
@@ -19,13 +19,15 @@ void Summ(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   for(uint32_t i = width * cur_thread; i < size && i < width * (cur_thread+1); ++i)
     arr_out[i] = arr1[i] + arr2[i];
 
+  MPI_Barrier(MPI_COMM_WORLD);
+
   #endif
 }
 
 void Diff(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #ifdef SERIAL
   for(uint32_t i=0; i<size; ++i)
-    arr_out[i] = arr1[i] - arr2[i]
+    arr_out[i] = arr1[i] - arr2[i];
 
   #else
   int32_t num_threads, cur_thread;
@@ -36,13 +38,15 @@ void Diff(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   for(uint32_t i = width * cur_thread; i < size && i < width * (cur_thread+1); ++i)
     arr_out[i] = arr1[i] - arr2[i];
 
+  MPI_Barrier(MPI_COMM_WORLD);
+
   #endif
 }
 
 void Mult(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #ifdef SERIAL
   for(uint32_t i=0; i<size; ++i)
-    arr_out[i] = arr1[i] * arr2[i]
+    arr_out[i] = arr1[i] * arr2[i];
 
   #else
   int32_t num_threads, cur_thread;
@@ -53,13 +57,15 @@ void Mult(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   for(uint32_t i = width * cur_thread; i < size && i < width * (cur_thread+1); ++i)
     arr_out[i] = arr1[i] * arr2[i];
 
+  MPI_Barrier(MPI_COMM_WORLD);
+
   #endif
 }
 
 void Div(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #ifdef SERIAL
   for(uint32_t i=0; i<size; ++i)
-    arr_out[i] = arr1[i] + arr2[i]
+    arr_out[i] = arr1[i] + arr2[i];
 
   #else
   int32_t num_threads, cur_thread;
@@ -72,6 +78,8 @@ void Div(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
       arr_out[i] = arr1[i] / arr2[i];
     // If arr2[i] == 0 consider it equal 1
     else arr_out[i] = arr1[i];
+
+  MPI_Barrier(MPI_COMM_WORLD);
 
   #endif
 }

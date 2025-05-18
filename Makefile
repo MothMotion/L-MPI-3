@@ -14,6 +14,11 @@ TARGET = program
 
 all: $(TARGET)
 
+serial: CCFLAGS += -DSERIAL
+serial: $(TARGET)
+
+parallel: $(TARGET)
+
 $(TARGET): $(OBJ)
 	$(CC) $(CCFLAGS) -o $@ $^
 

@@ -10,7 +10,7 @@ mkdir -p logs err
 #BSUB -eo err/pr4.err
 
 #export OMP_NUM_THREADS=4
-export ARRAY_SIZE=8000000
+export ARRAY_SIZE=1000000
 export CYCLES=100
 #export OMP_NUM_THREADS=4
 mpiexec -n 2 ./program

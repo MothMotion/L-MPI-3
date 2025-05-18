@@ -34,10 +34,17 @@ int main(int argc, char** argv) {
       Randomize(arr2, arr_size, MIN_RAND, MAX_RAND);
     MPI_Barrier(MPI_COMM_WORLD);
 
-
+    MPI_TIME(Summ, sum_time, cycles, rank, arr1, arr2, out, arr_size);
+    MPI_TIME(Diff, dif_time, cycles, rank, arr1, arr2, out, arr_size);
+    MPI_TIME(Mult, mul_time, cycles, rank, arr1, arr2, out, arr_size);
+    MPI_TIME(Div, div_time, cycles, rank, arr1, arr2, out, arr_size);
   }
-  #endif
+  MPI_Finalize();
+  if(rank == 0)
+    printf("Parallel execution:\n\tSum:\t%f\n\tDif:\t%f\n\tMul:\t%f\n\tDiv:\t%f\n",
+         sum_time, dif_time, mul_time, div_time);
 
+  #else
   for(uint32_t i=0; i<cycles; ++i) {
     Randomize(arr1, arr_size, MIN_RAND, MAX_RAND);
     Randomize(arr2, arr_size, MIN_RAND, MAX_RAND);
@@ -47,12 +54,11 @@ int main(int argc, char** argv) {
     ADDTIME_COR(Mult, mul_time, cycles, arr1, arr2, out, arr_size);
     ADDTIME_COR(Div, div_time, cycles, arr1, arr2, out, arr_size);
   }
-  printf("Serial ");
+
+  printf("Serial execution:\n\tSum:\t%f\n\tDif:\t%f\n\tMul:\t%f\n\tDiv:\t%f\n",
+         sum_time, dif_time, mul_time, div_time);
 
   #endif
-
-  printf("execution:\n\tSum:\t%f\n\tDif:\t%f\n\tMul:\t%f\n\tDiv:\t%f\n",
-         sum_time, dif_time, mul_time, div_time);
 
   return 0;
 }

@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include <mpi.h>
+#include <stdio.h>
 
 void Summ(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   #ifdef SERIAL
@@ -14,6 +15,7 @@ void Summ(arr_t* arr1, arr_t* arr2, arr_t* arr_out, const uint32_t size) {
   int32_t num_threads, cur_thread;
   MPI_Comm_size(MPI_COMM_WORLD, &num_threads);
   MPI_Comm_rank(MPI_COMM_WORLD, &cur_thread);
+  //printf("Hi. cur_thread: %d\n", cur_thread);
   uint32_t width = size / num_threads + (size % num_threads) ? 1 : 0;
 
   for(uint32_t i = width * cur_thread; i < size && i < width * (cur_thread+1); ++i)

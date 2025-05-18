@@ -24,12 +24,16 @@ parallel: $(TARGET)
 $(TARGET): $(OBJ)
 	$(CC) $(CCFLAGS) -o $@ $^
 
+DEP := $(patsubst $(OBJ_DIR)/%.o, $(OBJ_DIR)/%.d, $(OBJ))
+-include $(DEP)
+DEPFLAGS = -MMD -MF $(@:.o=.d)
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p obj
-	$(CC) $(CCFLAGS) -c $< -o $@
+	$(CC) $(CCFLAGS) -c $< -o $@ $(DEPFLAGS)
 
 clean:
-	rm -f $(OBJ)
+	rm -f $(OBJ) $(DEP)
 
 bsubload: $(TARGET)
 	for lsf_script in $(LSF) ; do \

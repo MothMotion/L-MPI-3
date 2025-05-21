@@ -39,34 +39,27 @@ int main(int argc, char** argv) {
            arr_size, cycles, sizeof(arr_t), size);
 
   for(uint32_t i=0; i<cycles; ++i) {
-    if(rank == 0) {
+    if(rank == 0)
       Randomize(arr1, arr_size, MIN_RAND, MAX_RAND);
-      for(uint32_t r=1; r<size; ++r)
-        MPI_Send(arr1, arr_size, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD);
-    } else
-      MPI_Recv(arr1, arr_size, MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    if(rank == 1) {
-      Randomize(arr2, arr_size, MIN_RAND, MAX_RAND);
-      for(uint32_t r=0; r<size; ++r)
-        if(r != rank)
-          MPI_Send(arr2, arr_size, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD); 
-    } else
-      MPI_Recv(arr2, arr_size, MPI_UNSIGNED_CHAR, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    if(rank == 1)
+      Randomize(arr2, arr_size, MIN_RAND, MAX_RAND); 
 
+    MPI_BROADCAST(arr1, arr_size, rank, 0, size);
+    MPI_BROADCAST(arr2, arr_size, rank, 1, size);
     MPI_Barrier(MPI_COMM_WORLD);
 
     MPI_TIME(Summ, sum_time, cycles, rank, arr1, arr2, out, arr_size);
-    MPI_SYNC(out, rank, size, arr_size, width);
+    ADDTIME_COR(MPI_SYNC, sum_time, cycles, out, rank, size, arr_size, width);
 
     MPI_TIME(Diff, dif_time, cycles, rank, arr1, arr2, out, arr_size);
-    MPI_SYNC(out, rank, size, arr_size, width);
+    ADDTIME_COR(MPI_SYNC, dif_time, cycles, out, rank, size, arr_size, width);
 
     MPI_TIME(Mult, mul_time, cycles, rank, arr1, arr2, out, arr_size);
-    MPI_SYNC(out, rank, size, arr_size, width);
+    ADDTIME_COR(MPI_SYNC, mul_time, cycles, out, rank, size, arr_size, width);
 
     MPI_TIME(Div, div_time, cycles, rank, arr1, arr2, out, arr_size);
-    MPI_SYNC(out, rank, size, arr_size, width);
+    ADDTIME_COR(MPI_SYNC, div_time, cycles, out, rank, size, arr_size, width);
   }
   MPI_Finalize();
   if(rank == 0)

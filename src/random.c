@@ -6,5 +6,5 @@
 
 void Randomize(arr_t* arr, const uint32_t size, const arr_t min_v, const arr_t max_v) {
   for(uint32_t i=0; i<size; ++i)
-    arr[i] = MAX(min_v, rand()%(max_v+1));
+    arr[i] = MAX(min_v, rand()%(max_v+1)); 
 }

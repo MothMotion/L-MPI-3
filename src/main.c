@@ -32,22 +32,41 @@ int main(int argc, char** argv) {
   int32_t rank, size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
-
+  uint32_t width = arr_size / size + (arr_size % size) ? 1 : 0;
+  
   if(rank == 0)
     printf("Settings:\n\tARRAY_SIZE:\t%d\n\tCYCLES:\t%d\n\tElement size:\t%lu\n\tCORES_AMOUNT:\t%d\n",
            arr_size, cycles, sizeof(arr_t), size);
 
   for(uint32_t i=0; i<cycles; ++i) {
-    if(rank == 0)
+    if(rank == 0) {
       Randomize(arr1, arr_size, MIN_RAND, MAX_RAND);
-    if(size == 1 || size >= 2 && rank == 1)
+      for(uint32_t r=1; r<size; ++r)
+        MPI_Send(arr1, arr_size, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD);
+    } else
+      MPI_Recv(arr1, arr_size, MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    if(rank == 1) {
       Randomize(arr2, arr_size, MIN_RAND, MAX_RAND);
+      for(uint32_t r=0; r<size; ++r)
+        if(r != rank)
+          MPI_Send(arr2, arr_size, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD); 
+    } else
+      MPI_Recv(arr2, arr_size, MPI_UNSIGNED_CHAR, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
     MPI_Barrier(MPI_COMM_WORLD);
 
     MPI_TIME(Summ, sum_time, cycles, rank, arr1, arr2, out, arr_size);
+    MPI_SYNC(out, rank, size, arr_size, width);
+
     MPI_TIME(Diff, dif_time, cycles, rank, arr1, arr2, out, arr_size);
+    MPI_SYNC(out, rank, size, arr_size, width);
+
     MPI_TIME(Mult, mul_time, cycles, rank, arr1, arr2, out, arr_size);
+    MPI_SYNC(out, rank, size, arr_size, width);
+
     MPI_TIME(Div, div_time, cycles, rank, arr1, arr2, out, arr_size);
+    MPI_SYNC(out, rank, size, arr_size, width);
   }
   MPI_Finalize();
   if(rank == 0)

@@ -15,9 +15,34 @@ int main(int argc, char** argv) {
   const uint32_t arr_size = ARRAY_SIZE;
   const uint32_t cycles   = CYCLES;
 
+  #ifdef SERIAL
   arr_t *arr1 = malloc(arr_size * sizeof(arr_t)),
         *arr2 = malloc(arr_size * sizeof(arr_t)),
         *out  = malloc(arr_size * sizeof(arr_t));
+
+  #else
+  MPI_Init(&argc, &argv);
+  int32_t rank, size;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  uint32_t width = arr_size / size + (arr_size % size) ? 1 : 0;
+
+  arr_t *arr1, *arr2, *out;
+
+  if(rank == 0) {
+    arr1 = malloc(arr_size * sizeof(arr_t));
+    out  = malloc(arr_size * sizeof(arr_t));
+  } else {
+    arr1 = malloc(MIN(width, arr_size - width * rank));
+    out  = malloc(MIN(width, arr_size - width * rank));
+    
+    if(rank == 1)
+      arr2 = malloc(arr_size * sizeof(arr_t));
+    else
+      arr2 = malloc(MIN(width, arr_size - width * rank));
+  }
+
+  #endif
 
   float sum_time = 0.0, dif_time = 0.0,
         mul_time = 0.0, div_time = 0.0;
@@ -28,12 +53,6 @@ int main(int argc, char** argv) {
   #endif
 
   #ifndef SERIAL
-  MPI_Init(&argc, &argv);
-  int32_t rank, size;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-  uint32_t width = arr_size / size + (arr_size % size) ? 1 : 0;
-  
   if(rank == 0)
     printf("Settings:\n\tARRAY_SIZE:\t%d\n\tCYCLES:\t%d\n\tElement size:\t%lu\n\tTHREADS_AMOUNT:\t%d\n",
            arr_size, cycles, sizeof(arr_t), size);
@@ -45,8 +64,8 @@ int main(int argc, char** argv) {
     if(rank == 1)
       Randomize(arr2, arr_size, MIN_RAND, MAX_RAND); 
 
-    MPI_BROADCAST(arr1, arr_size, rank, 0, size);
-    MPI_BROADCAST(arr2, arr_size, rank, 1, size);
+    MPI_BROADCAST(arr1, arr_size, rank, 0, size, width);
+    MPI_BROADCAST(arr2, arr_size, rank, 1, size, width);
     MPI_Barrier(MPI_COMM_WORLD);
 
     MPI_TIME(Summ, sum_time, cycles, rank, arr1, arr2, out, arr_size);
